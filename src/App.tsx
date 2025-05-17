@@ -1,7 +1,31 @@
 import { useState } from 'react';
 import { RACES } from './data/races';
 import RaceSelector from './components/RaceSelector';
-import { rollDetailedCharacterStats, formatDetailedStats, StatDetails } from './utils/statUtils';
+import { rollDetailedCharacterStats, StatDetails } from './utils/statUtils';
+import { CharacterStats, STAT_NAMES } from './types/warhammer';
+import StatDisplay from './components/StatDisplay';
+
+// Stałe z listami statystyk
+const BASE_STATS: Array<keyof CharacterStats> = [
+  'weaponSkill',
+  'ballisticSkill',
+  'strength',
+  'toughness',
+  'agility',
+  'intelligence',
+  'willpower',
+  'fellowship',
+];
+
+const SECONDARY_STATS: Array<keyof CharacterStats> = [
+  'attacks',
+  'fatePoints',
+  'luckPoints',
+  'wounds',
+  'movement',
+  'magic',
+  'insanityPoints',
+];
 
 function App() {
   const [selectedRaceId, setSelectedRaceId] = useState<string>();
@@ -31,30 +55,32 @@ function App() {
         {stats && (
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <h3 className="text-xl font-semibold mb-4">Statystyki:</h3>
-            <ul className="space-y-3">
-              {formatDetailedStats(stats).map((stat, index) => (
-                <li key={index} className="flex flex-col">
-                  <div className="flex justify-between">
-                    <span className="font-medium">{stat.label}</span>
-                    <span className="font-bold">{stat.details.total}</span>
-                  </div>
-                  <div className="text-sm text-gray-600">
-                    = {stat.details.base}
-                    {stat.details.raceBonus !== 0 && (
-                      <span
-                        className={stat.details.raceBonus > 0 ? 'text-green-600' : 'text-red-600'}
-                      >
-                        {stat.details.raceBonus > 0
-                          ? ` +${stat.details.raceBonus}`
-                          : ` ${stat.details.raceBonus}`}
-                      </span>
-                    )}
-                    {` (${stat.details.baseWithBonus})`} + {stat.details.dice1} +{' '}
-                    {stat.details.dice2}
-                  </div>
-                </li>
-              ))}
-            </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Podstawowe statystyki */}
+              <div>
+                <h4 className="font-medium mb-2">Podstawowe:</h4>
+                <ul className="space-y-2">
+                  {BASE_STATS.map((stat) => (
+                    <StatDisplay key={stat} stat={stats[stat]} name={STAT_NAMES[stat]} />
+                  ))}
+                </ul>
+              </div>
+
+              {/* Nowe statystyki */}
+              <div>
+                <h4 className="font-medium mb-2">Dodatkowe:</h4>
+                <ul className="space-y-2">
+                  {SECONDARY_STATS.map((stat) => (
+                    <StatDisplay
+                      key={stat}
+                      stat={stats[stat]}
+                      name={STAT_NAMES[stat]}
+                      isSpecialStat={true}
+                    />
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
         )}
       </div>
