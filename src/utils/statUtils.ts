@@ -1,6 +1,12 @@
-/* eslint-disable */
-
 import { CharacterStats, Race, STAT_NAMES } from '../types/warhammer';
+
+export type StatDetails = {
+  base: number; // 20
+  dice1: number; // pierwsza kostka D10 (1-10)
+  dice2: number; // druga kostka D10 (1-10)
+  raceBonus: number; // bonus/malus rasowy
+  total: number; // suma: base + dice1 + dice2 + raceBonus
+};
 
 export const rollCharacterStats = (race?: Race): CharacterStats => {
   const roll2D10 = (): number =>
@@ -19,7 +25,6 @@ export const rollCharacterStats = (race?: Race): CharacterStats => {
 
   if (!race) return baseStats;
 
-  // Zastosuj bonusy rasowe (uwzględniając ujemne wartości)
   return {
     weaponSkill: baseStats.weaponSkill + (race.statBonuses.weaponSkill || 0),
     ballisticSkill: baseStats.ballisticSkill + (race.statBonuses.ballisticSkill || 0),
@@ -32,6 +37,31 @@ export const rollCharacterStats = (race?: Race): CharacterStats => {
   };
 };
 
+export const rollDetailedCharacterStats = (
+  race?: Race,
+): Record<keyof CharacterStats, StatDetails> => {
+  const rollD10 = (): number => Math.floor(Math.random() * 10) + 1;
+
+  return (Object.keys(STAT_NAMES) as Array<keyof CharacterStats>).reduce(
+    (acc, stat) => {
+      const dice1 = rollD10();
+      const dice2 = rollD10();
+      const raceBonus = race?.statBonuses[stat] || 0;
+      const base = 20;
+
+      acc[stat] = {
+        base,
+        dice1,
+        dice2,
+        raceBonus,
+        total: base + dice1 + dice2 + raceBonus,
+      };
+      return acc;
+    },
+    {} as Record<keyof CharacterStats, StatDetails>,
+  );
+};
+
 export const formatStatsForDisplay = (
   stats: CharacterStats,
   race?: Race,
@@ -41,4 +71,25 @@ export const formatStatsForDisplay = (
     value: stats[key],
     bonus: race?.statBonuses[key],
   }));
+};
+
+export const formatDetailedStats = (
+  stats: Record<keyof CharacterStats, StatDetails>,
+): Array<{ label: string; text: string; details: StatDetails }> => {
+  return (Object.keys(stats) as Array<keyof CharacterStats>).map((stat) => {
+    const detail = stats[stat];
+    const bonusText =
+      detail.raceBonus !== 0 ? ` ${detail.raceBonus > 0 ? '+' : ''}${detail.raceBonus}` : '';
+
+    return {
+      label: STAT_NAMES[stat],
+      text: `${STAT_NAMES[stat]}: ${detail.total} = ${detail.base} + ${detail.dice1} + ${detail.dice2}${bonusText}`,
+      details: detail,
+    };
+  });
+};
+
+// Funkcja pomocnicza
+export const getRollTotal = (details: StatDetails): number => {
+  return details.base + details.dice1 + details.dice2 + details.raceBonus;
 };

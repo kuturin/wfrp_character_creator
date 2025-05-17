@@ -1,18 +1,16 @@
-/* eslint-disable */
 import { useState } from 'react';
 import { RACES } from './data/races';
 import RaceSelector from './components/RaceSelector';
-import { rollCharacterStats, formatStatsForDisplay } from './utils/statUtils';
-import { CharacterStats, Race } from './types/warhammer';
+import { rollDetailedCharacterStats, formatDetailedStats, StatDetails } from './utils/statUtils';
 
 function App() {
   const [selectedRaceId, setSelectedRaceId] = useState<string>();
-  const [stats, setStats] = useState<CharacterStats>();
+  const [stats, setStats] = useState<Record<string, StatDetails>>();
 
   const selectedRace = RACES.find((r) => r.id === selectedRaceId);
 
   const handleRollStats = () => {
-    const newStats = rollCharacterStats(selectedRace);
+    const newStats = rollDetailedCharacterStats(selectedRace);
     setStats(newStats);
   };
 
@@ -33,18 +31,25 @@ function App() {
         {stats && (
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <h3 className="text-xl font-semibold mb-4">Statystyki:</h3>
-            <ul className="space-y-2">
-              {formatStatsForDisplay(stats, selectedRace).map((statLine, index) => (
-                <li key={index} className="flex justify-between">
-                  <span>{statLine.label}</span>
-                  <span className="font-medium">
-                    {statLine.value}
-                    {statLine.bonus && (
-                      <span className={statLine.bonus > 0 ? 'text-green-600' : 'text-red-600'}>
-                        {statLine.bonus > 0 ? ` (+${statLine.bonus})` : ` (${statLine.bonus})`}
+            <ul className="space-y-3">
+              {formatDetailedStats(stats).map((stat, index) => (
+                <li key={index} className="flex flex-col">
+                  <div className="flex justify-between">
+                    <span className="font-medium">{stat.label}</span>
+                    <span className="font-bold">{stat.details.total}</span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    = {stat.details.base} + {stat.details.dice1} + {stat.details.dice2}
+                    {stat.details.raceBonus !== 0 && (
+                      <span
+                        className={stat.details.raceBonus > 0 ? 'text-green-600' : 'text-red-600'}
+                      >
+                        {stat.details.raceBonus > 0
+                          ? ` +${stat.details.raceBonus}`
+                          : ` ${stat.details.raceBonus}`}
                       </span>
                     )}
-                  </span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -54,4 +59,5 @@ function App() {
     </div>
   );
 }
+
 export default App;
