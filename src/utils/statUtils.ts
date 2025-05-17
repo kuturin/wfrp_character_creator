@@ -1,11 +1,12 @@
 import { CharacterStats, Race, STAT_NAMES } from '../types/warhammer';
 
 export type StatDetails = {
-  base: number; // 20
-  dice1: number; // pierwsza kostka D10 (1-10)
-  dice2: number; // druga kostka D10 (1-10)
-  raceBonus: number; // bonus/malus rasowy
-  total: number; // suma: base + dice1 + dice2 + raceBonus
+  base: number; // 20 (stała wartość)
+  dice1: number; // pierwsza kostka D10
+  dice2: number; // druga kostka D10
+  raceBonus: number; // bonus rasowy
+  baseWithBonus: number; // 20 + bonus rasowy
+  total: number; // suma wszystkich elementów
 };
 
 export const rollCharacterStats = (race?: Race): CharacterStats => {
@@ -47,14 +48,15 @@ export const rollDetailedCharacterStats = (
       const dice1 = rollD10();
       const dice2 = rollD10();
       const raceBonus = race?.statBonuses[stat] || 0;
-      const base = 20;
+      const baseWithBonus = 20 + raceBonus; // Bonus od razu dodany do bazy 20
 
       acc[stat] = {
-        base,
+        base: 20, // Zachowujemy oryginalną wartość bazową
         dice1,
         dice2,
-        raceBonus,
-        total: base + dice1 + dice2 + raceBonus,
+        raceBonus, // Nadal przechowujemy bonus osobno do wyświetlenia
+        baseWithBonus, // Nowe pole z sumą bazy i bonusu
+        total: baseWithBonus + dice1 + dice2,
       };
       return acc;
     },

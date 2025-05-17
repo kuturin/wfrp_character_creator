@@ -39,7 +39,7 @@ function App() {
                     <span className="font-bold">{stat.details.total}</span>
                   </div>
                   <div className="text-sm text-gray-600">
-                    = {stat.details.base} + {stat.details.dice1} + {stat.details.dice2}
+                    = {stat.details.base}
                     {stat.details.raceBonus !== 0 && (
                       <span
                         className={stat.details.raceBonus > 0 ? 'text-green-600' : 'text-red-600'}
@@ -49,6 +49,8 @@ function App() {
                           : ` ${stat.details.raceBonus}`}
                       </span>
                     )}
+                    {` (${stat.details.baseWithBonus})`} + {stat.details.dice1} +{' '}
+                    {stat.details.dice2}
                   </div>
                 </li>
               ))}
